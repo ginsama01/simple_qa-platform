@@ -5,7 +5,9 @@ import * as upvoteController from "./upvoteController.js";
 
 export default {
     handleGetCourses: courseController.handleGetCourses,
+    handleGetCourse: courseController.handleGetCourse,
     handleGetQuestions: questionController.handleGetQuestions,
+    handleGetQuestion: questionController.handleGetQuestion,
     handlePostQuestion: questionController.handlePostQuestion,
     handleGetAnswers: answerController.handleGetAnswers,
     handlePostAnswer: answerController.handlePostAnswer,

@@ -5,35 +5,35 @@ import { cacheMethodCalls } from "../utils/cacheUtil.js";
 
 const cacheUpvoteService = cacheMethodCalls(
     upvoteService,
-    []
+    ["createQuestionUpvote", "createAnswerUpvote"]
 );
 
 const cacheQuestionService = cacheMethodCalls(
     questionService,
-    []
+    ["updateUpvoteQuestion"]
 );
 
 const cacheAnswerService = cacheMethodCalls(
     answerService,
-    []
+    ["updateUpvoteAnswer"]
 );
 
 const handleUpvote = async (request) => {
     try {
         const body = await request.json();
         if (body.questionId) {
-            const checkUpvote = cacheUpvoteService.findQuestionUpvote(body.questionId, body.uuid);
+            const checkUpvote = await cacheUpvoteService.findQuestionUpvote(body.courseId, body.uuid);
             if (checkUpvote.length != 0) {
-                return Response.json({message: "You only can upvote this question one time"}, {status: 400});
+                return Response.json({message: "You only can upvote only one question in this course"}, {status: 400});
             } else {
                 await cacheUpvoteService.createQuestionUpvote(body.questionId, body.uuid);
                 await cacheQuestionService.updateUpvoteQuestion(body.questionId);
                 return Response.json({message: "Upvote successfully"}, {status: 201});
             }
         } else {
-            const checkUpvote = cacheUpvoteService.findAnswerUpvote(body.answerId, body.uuid);
+            const checkUpvote = cacheUpvoteService.findAnswerUpvote(body.questionId, body.uuid);
             if (checkUpvote.length != 0) {
-                return Response.json({message: "You only can upvote this answer one time"}, {status: 400});
+                return Response.json({message: "You only can upvote only one answer in this question"}, {status: 400});
             } else {
                 await cacheUpvoteService.createAnswerUpvote(body.answerId, body.uuid);
                 await cacheAnswerService.updateUpvoteAnswer(body.answerId);
@@ -41,7 +41,7 @@ const handleUpvote = async (request) => {
             }
         }
     } catch (err) {
-        return Response.json(err, {status: 400});
+        return Response.json(err.message, {status: 400});
     }
 }
 

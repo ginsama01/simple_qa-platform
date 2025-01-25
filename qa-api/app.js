@@ -9,8 +9,18 @@ const urlMapping = [
   },
   {
     method: "GET",
+    pattern: new URLPattern({ pathname: "/courses/:id" }),
+    fn: controllers.handleGetCourse,
+  },
+  {
+    method: "GET",
     pattern: new URLPattern({ pathname: "/questions" }),
     fn: controllers.handleGetQuestions,
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/questions/:id" }),
+    fn: controllers.handleGetQuestion,
   },
   {
     method: "POST",

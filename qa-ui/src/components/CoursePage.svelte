@@ -1,0 +1,144 @@
+<script>
+  import { getOneCourse } from "../api/courses.js";
+  import { getAllQuestions, postQuestion } from "../api/questions.js";
+  import { postUpvoteQuestion } from "../api/upvote.js";
+  import { userUuid } from "../stores/stores.js";
+  import { onMount } from "svelte";
+  import AlertModal from "./AlertModal.svelte";
+
+  export let id;
+
+  let course;
+  let questions;
+  let visibleQuestions = [];
+  let loadCount;
+  let content;
+
+  let showSubmitModal = false;
+  let modalMessage = "";
+  let modalStatus = 0;
+
+  function handleScroll() {
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+
+    if (scrollTop + clientHeight >= scrollHeight - 5) {
+      if (loadCount < questions.length) {
+        loadCount += 20;
+        visibleQuestions = [];
+        for (let i = 0; i < Math.min(questions.length, loadCount); ++i) {
+          visibleQuestions.push(questions[i]);
+        }
+        console.log(visibleQuestions);
+        console.log(loadCount);
+      }
+    }
+  }
+
+  onMount(async () => {
+    const courses = await getOneCourse(id);
+    if (courses.length == 1 && courses[0].id) {
+      course = courses[0];
+    }
+    questions = await getAllQuestions(id);
+    loadCount = 20;
+    for (let i = 0; i < Math.min(questions.length, loadCount); ++i) {
+      visibleQuestions.push(questions[i]);
+    }
+    console.log(visibleQuestions);
+    console.log(loadCount);
+    window.addEventListener('scroll', handleScroll);
+  });
+
+  const submitAddQuestion = async () => {
+    const data = {
+      courseId: course.id,
+      content: content,
+      uuid: $userUuid,
+    };
+    const response = await postQuestion(data);
+    if (response.status == 201) {
+      modalStatus = 1;
+    } else {
+      modalStatus = 0;
+    }
+    modalMessage = response.message;
+    showSubmitModal = true;
+    questions = await getAllQuestions(id);
+    visibleQuestions = [];
+    for (let i = 0; i < Math.min(questions.length, loadCount); ++i) {
+      visibleQuestions.push(questions[i]);
+    }
+    content = "";
+  };
+
+  const submitUpvoteQuestion = async (question) => {
+    const data = {
+      questionId: question.id,
+      courseId: id,
+      uuid: $userUuid,
+    };
+    const response = await postUpvoteQuestion(data);
+    if (response.status == 201) {
+      modalStatus = 1;
+    } else {
+      modalStatus = 0;
+    }
+    modalMessage = response.message;
+    showSubmitModal = true;
+  };
+
+  const closeModal = () => {
+    showSubmitModal = false;
+  };
+</script>
+
+{#if course}
+  <div class="mx-auto my-auto text-center bg-white p-4 rounded shadow-lg mt-6">
+    <h1 class="text-3xl font-bold text-blue-600">{course.title}</h1>
+    <p class="text-lg text-gray-700 mt-2 mb-6">{course.description}</p>
+    <textarea
+      bind:value={content}
+      class="w-full h-20 border rounded p-2"
+      placeholder="Write your question here..."
+    ></textarea>
+    <button
+      class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4"
+      on:click={() => submitAddQuestion()}
+    >
+      Add question
+    </button>
+  </div>
+  <AlertModal
+    bind:showModal={showSubmitModal}
+    bind:message={modalMessage}
+    bind:modalStatus
+    {closeModal}
+  />
+  {#if questions}
+    <div>
+      <ul class="space-y-4 my-4">
+        {#each visibleQuestions as question}
+          <li class="p-4 border rounded hover:bg-gray-100 cursor-pointer">
+            <div class="flex justify-between">
+              <span class="text-lg"
+                ><strong>Q: </strong>{question.content}
+                <br />
+                <span class="text-sm text-gray-400"
+                  >Posted by {question.user_uuid}</span
+                >
+              </span>
+              <span class="flex items-center space-x-2">
+                <button
+                  class="bg-green-500 text-white px-2 py-1 rounded"
+                  on:click={() => submitUpvoteQuestion(question)}>▲</button
+                >
+              </span>
+            </div>
+          </li>
+        {/each}
+      </ul>
+    </div>
+  {/if}
+{:else}
+  <p>Loading</p>
+{/if}

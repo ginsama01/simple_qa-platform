@@ -15,6 +15,17 @@ const handleGetCourses = async (request) => {
     }
 }
 
+const handleGetCourse = async (request, urlPatternResult) => {
+    const id = urlPatternResult.pathname.groups.id;
+    try {
+        const course = await cacheCourseService.findOneCourse(id);
+        return Response.json(course, {status: 200});
+    } catch (err) {
+        return Response.json({ message: "Not found" }, { status: 404 });
+    }
+}
+
 export {
-    handleGetCourses
+    handleGetCourses,
+    handleGetCourse
 }
