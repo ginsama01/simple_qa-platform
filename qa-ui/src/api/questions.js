@@ -5,7 +5,7 @@ const getAllQuestions = async (courseId) => {
 }
 
 const getOneQuestion = async (questionId) => {
-    const reponse = await fetch("/api/question/" + questionId);
+    const response = await fetch("/api/questions/" + questionId);
     return await response.json();
 }
 

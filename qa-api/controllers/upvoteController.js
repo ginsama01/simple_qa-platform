@@ -31,7 +31,7 @@ const handleUpvote = async (request) => {
                 return Response.json({message: "Upvote successfully"}, {status: 201});
             }
         } else {
-            const checkUpvote = cacheUpvoteService.findAnswerUpvote(body.questionId, body.uuid);
+            const checkUpvote = await cacheUpvoteService.findAnswerUpvote(body.id, body.uuid);
             if (checkUpvote.length != 0) {
                 return Response.json({message: "You only can upvote only one answer in this question"}, {status: 400});
             } else {
@@ -45,6 +45,44 @@ const handleUpvote = async (request) => {
     }
 }
 
+const getQuestionUpvote = async (request, urlPatternResult) => {
+    try {
+        const id = urlPatternResult.pathname.groups.id;
+        const url = new URL(request.url);
+        const uuid = url.searchParams.get("uuid");
+        console.log(id);
+        console.log(uuid);
+        const checkUpvote = await cacheUpvoteService.findQuestionUpvote(id, uuid);
+        if (checkUpvote.length != 0) {
+            return Response.json(checkUpvote[0], {status: 200});
+        } else {
+            return Response.json({message: "Not found"}, {status: 404});
+        }
+    } catch (err) {
+        return Response.json(err.message, {status: 400});
+    }
+
+}
+
+const getAnswerUpvote = async (request, urlPatternResult) => {
+    try {
+        const id = urlPatternResult.pathname.groups.id;
+        const url = new URL(request.url);
+        const uuid = url.searchParams.get("uuid");
+        const checkUpvote = await cacheUpvoteService.findAnswerUpvote(id, uuid);
+        if (checkUpvote.length != 0) {
+            return Response.json(checkUpvote[0], {status: 200});
+        } else {
+            return Response.json({message: "Not found"}, {status: 404});
+        }
+    } catch (err) {
+        return Response.json(err.message, {status: 400});
+    }
+
+}
+
 export {
-    handleUpvote
+    handleUpvote,
+    getQuestionUpvote,
+    getAnswerUpvote
 }

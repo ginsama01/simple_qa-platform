@@ -1,5 +1,6 @@
 import * as questionService from "../services/questionService.js";
 import * as answerService from "../services/answerService.js";
+import * as courseService from "../services/courseService.js";
 import { cacheMethodCalls } from "../utils/cacheUtil.js";
 
 const cacheQuestionService = cacheMethodCalls(
@@ -12,11 +13,15 @@ const cacheAnswerService = cacheMethodCalls(
     ["createAnswer", "updateUpvoteAnswer"]
 );
 
+const cacheCourseService = cacheMethodCalls(
+    courseService,
+    []
+);
+
 const handleGetQuestions = async (request) => {
     try {
         const url = new URL(request.url);
         const courseId = url.searchParams.get("courseId");
-        console.log(courseId);
         const questions = await cacheQuestionService.findAllQuestions(courseId);
         questions.sort((a, b) => new Date(b.last_upvote) - new Date(a.last_upvote));
         return Response.json(questions, {status: 200});
@@ -28,7 +33,10 @@ const handleGetQuestions = async (request) => {
 const handleGetQuestion = async (request, urlPatternResult) => {
     const id = urlPatternResult.pathname.groups.id;
     try {
-        const question = await cacheQuestionService.findOneQuestion(id);
+        const questions = await cacheQuestionService.findOneQuestion(id);
+        const courses = await cacheCourseService.findOneCourse(questions[0].course_id);
+        let question = questions[0];
+        question.course = courses[0];
         return Response.json(question, {status: 200});
     } catch (err) {
         return Response.json({ message: "Not found" }, { status: 404 });
@@ -46,8 +54,7 @@ const createRandomAnswers = async (content, id) => {
                 body: JSON.stringify({question: content}),
             });
             const answer = await response.json();
-            console.log(answer[0]);
-            // await cacheAnswerService.createAnswer(id, answer[0].generated_text, "Anonymous");
+            await cacheAnswerService.createAnswer(id, answer[0].generated_text, "Anonymous");
         }
     } catch (err) {
         console.log(err.message);
@@ -72,7 +79,7 @@ const handlePostQuestion = async (request) => {
             } 
         }
         const question = await cacheQuestionService.createQuestion(body.courseId, body.content, body.uuid);
-        createRandomAnswers(body.content, question.id);
+        createRandomAnswers(body.content, question[0].id);
         return Response.json({message: "Create question successfully!"}, {status: 201});
     } catch (err) {
         return Response.json(err.message, {status: 400});

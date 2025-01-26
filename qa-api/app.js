@@ -38,6 +38,16 @@ const urlMapping = [
     fn: controllers.handlePostAnswer,
   },
   {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/upvote/question/:id" }),
+    fn: controllers.handleGetQuestionUpvote,
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/upvote/answer/:id" }),
+    fn: controllers.handleGetAnswerUpvote,
+  },
+  {
     method: "POST",
     pattern: new URLPattern({ pathname: "/upvote" }),
     fn: controllers.handleUpvote,

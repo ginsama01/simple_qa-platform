@@ -11,5 +11,7 @@ export default {
     handlePostQuestion: questionController.handlePostQuestion,
     handleGetAnswers: answerController.handleGetAnswers,
     handlePostAnswer: answerController.handlePostAnswer,
-    handleUpvote: upvoteController.handleUpvote
+    handleUpvote: upvoteController.handleUpvote,
+    handleGetQuestionUpvote: upvoteController.getQuestionUpvote,
+    handleGetAnswerUpvote: upvoteController.getAnswerUpvote
 }
