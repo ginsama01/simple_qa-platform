@@ -1,6 +1,7 @@
 import * as answerService from "../services/answerService.js";
 import * as questionService from "../services/questionService.js";
 import { cacheMethodCalls } from "../utils/cacheUtil.js";
+import { sendPingUpdateQuestion } from "../utils/webSocket.js";
 
 const cacheAnswerService = cacheMethodCalls(
     answerService,
@@ -42,9 +43,10 @@ const handlePostAnswer = async (request) => {
             } 
         }
         const answer = await cacheAnswerService.createAnswer(body.questionId, body.content, body.uuid);
+        sendPingUpdateQuestion("Update answer");
         return Response.json({message: "Create answer successfully!"}, {status: 201});
     } catch (err) {
-        return Response.json(err, {status: 400});
+        return Response.json(err.message, {status: 400});
     }
 }
 

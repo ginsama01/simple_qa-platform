@@ -14,6 +14,8 @@
   let loadCount;
   let content;
 
+  let ws;
+
   let upvoteId = -1;
   let showSubmitModal = false;
   let modalMessage = "";
@@ -33,6 +35,22 @@
     }
   }
 
+  const createSocketConnection = () => {
+    ws = new WebSocket("ws://localhost:7800/api/ws");
+
+    ws.onmessage = async (event) => {
+      if (event.data == "Update question") {
+        questions = await getAllQuestions(id);
+        visibleQuestions = [];
+        for (let i = 0; i < Math.min(questions.length, loadCount); ++i) {
+          visibleQuestions.push(questions[i]);
+        }
+      }
+    };
+
+    return;
+  };
+
   onMount(async () => {
     const courses = await getOneCourse(id);
     if (courses.length == 1 && courses[0].id) {
@@ -49,7 +67,8 @@
       upvoteId = upvote.question_id;
       console.log(upvoteId);
     }
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    createSocketConnection();
   });
 
   const submitAddQuestion = async () => {
@@ -122,8 +141,13 @@
       <ul class="space-y-4 my-4">
         {#each visibleQuestions as question}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <li class="p-4 border rounded hover:bg-gray-100 cursor-pointer {upvoteId == question.id ? "border-yellow-600" : ""}"
-            on:click={() => (window.location.href = `/questions/${question.id}`)}
+          <li
+            class="p-4 border rounded hover:bg-gray-100 cursor-pointer {upvoteId ==
+            question.id
+              ? 'border-yellow-600'
+              : ''}"
+            on:click={() =>
+              (window.location.href = `/questions/${question.id}`)}
           >
             <div class="flex justify-between">
               <span class="text-lg"
@@ -136,7 +160,8 @@
               <span class="flex items-center space-x-2">
                 <button
                   class="bg-green-500 text-white px-2 py-1 rounded"
-                  on:click|stopPropagation={() => submitUpvoteQuestion(question)}>▲</button
+                  on:click|stopPropagation={() =>
+                    submitUpvoteQuestion(question)}>▲</button
                 >
               </span>
             </div>

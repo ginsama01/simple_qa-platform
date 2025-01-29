@@ -28,3 +28,9 @@ CREATE TABLE upvotes (
     answer_id INTEGER REFERENCES answers(id),
     user_uuid TEXT NOT NULL
 );
+
+CREATE INDEX ques_user_uuid_co_id_idx ON 
+    questions (user_uuid, course_id);
+
+CREATE INDEX ans_user_uuid_ques_id_idx ON
+    answers (user_uuid, question_id);

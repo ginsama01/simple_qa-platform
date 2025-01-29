@@ -1,5 +1,7 @@
 import { serve } from "./deps.js";
+import { processSocket } from "./utils/webSocket.js"
 import controllers from "./controllers/controllers.js";
+
 
 const urlMapping = [
   {
@@ -55,17 +57,15 @@ const urlMapping = [
 ];
 
 const handleRequest = async (request) => {
-  // const data = await request.json();
+  if (request.headers.get("upgrade") === "websocket") {   
+    console.log("abc");
+    const { socket, response } = Deno.upgradeWebSocket(request);
 
-  // const response = await fetch("http://llm-api:7000/", {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //   },
-  //   body: JSON.stringify(data),
-  // });
+    processSocket(socket);
 
-  // return response;
+    return response;
+  }
+
   const mapping = urlMapping.find(
     (um) => um.method === request.method && um.pattern.test(request.url)
   );

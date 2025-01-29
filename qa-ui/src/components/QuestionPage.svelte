@@ -13,6 +13,7 @@
   let visibleAnswers = [];
   let loadCount;
   let content;
+  let ws;
 
   let upvoteId = -1;
   let showSubmitModal = false;
@@ -33,6 +34,22 @@
     }
   }
 
+  const createSocketConnection = () => {
+    ws = new WebSocket("ws://localhost:7800/api/ws");
+
+    ws.onmessage = async (event) => {
+      if (event.data == "Update answer") {
+        answers = await getAllAnswers(id);
+        visibleAnswers = [];
+        for (let i = 0; i < Math.min(answers.length, loadCount); ++i) {
+          visibleAnswers.push(answers[i]);
+        }
+      }
+    };
+
+    return;
+  };
+
   onMount(async () => {
     question = await getOneQuestion(id);
     answers = await getAllAnswers(id);
@@ -47,6 +64,7 @@
       console.log(upvoteId);
     }
     window.addEventListener("scroll", handleScroll);
+    createSocketConnection();
   });
 
   const submitAddAnswer = async () => {
@@ -126,7 +144,11 @@
     <div>
       <ul class="space-y-4 my-4">
         {#each visibleAnswers as answer}
-          <li class="p-4 border rounded {upvoteId == answer.id ? "border-yellow-600" : ""}">
+          <li
+            class="p-4 border rounded {upvoteId == answer.id
+              ? 'border-yellow-600'
+              : ''}"
+          >
             <div class="flex justify-between">
               <span class="text-lg"
                 ><strong>A: </strong>{answer.content}

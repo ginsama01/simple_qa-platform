@@ -2,6 +2,7 @@ import * as questionService from "../services/questionService.js";
 import * as answerService from "../services/answerService.js";
 import * as courseService from "../services/courseService.js";
 import { cacheMethodCalls } from "../utils/cacheUtil.js";
+import { sendPingUpdateQuestion } from "../utils/webSocket.js";
 
 const cacheQuestionService = cacheMethodCalls(
     questionService,
@@ -55,6 +56,7 @@ const createRandomAnswers = async (content, id) => {
             });
             const answer = await response.json();
             await cacheAnswerService.createAnswer(id, answer[0].generated_text, "Anonymous");
+            sendPingUpdateQuestion("Update answer");
         }
     } catch (err) {
         console.log(err.message);
@@ -80,6 +82,7 @@ const handlePostQuestion = async (request) => {
         }
         const question = await cacheQuestionService.createQuestion(body.courseId, body.content, body.uuid);
         createRandomAnswers(body.content, question[0].id);
+        sendPingUpdateQuestion("Update question");
         return Response.json({message: "Create question successfully!"}, {status: 201});
     } catch (err) {
         return Response.json(err.message, {status: 400});
