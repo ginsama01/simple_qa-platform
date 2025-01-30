@@ -6,7 +6,7 @@
   import { onMount } from "svelte";
   import AlertModal from "./AlertModal.svelte";
 
-  export let id;
+  let id = localStorage.getItem("courseId") || "";
 
   let course;
   let questions;
@@ -112,6 +112,12 @@
   const closeModal = () => {
     showSubmitModal = false;
   };
+
+  const openQuestionPage = async (id) => {
+    localStorage.setItem("questionId", id);
+    window.location.href = '/questions';
+  }
+
 </script>
 
 {#if course}
@@ -146,8 +152,7 @@
             question.id
               ? 'border-yellow-600'
               : ''}"
-            on:click={() =>
-              (window.location.href = `/questions/${question.id}`)}
+            on:click={() => openQuestionPage(question.id)}
           >
             <div class="flex justify-between">
               <span class="text-lg"

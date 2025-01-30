@@ -8,7 +8,11 @@
     courses = await getAllCourses();
   });
 
-  console.log(courses);
+  const openCoursePage = async (id) => {
+    localStorage.setItem("courseId", id);
+    window.location.href = '/courses';
+  }
+
 </script>
 
 {#if courses}
@@ -19,12 +23,12 @@
         <div class="bg-white shadow-md rounded-lg p-4">
           <h2 class="text-xl font-semibold text-blue-600">{course.title}</h2>
           <p class="text-gray-600 mt-2">{course.description}</p>
-          <a
-            href={`/courses/${course.id}`}
-            class="block mt-4 text-center bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
+          <button
+            on:click={() => openCoursePage(course.id)}
+            class="block w-full mt-4 text-center bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
           >
             View Course
-          </a>
+        </button>
         </div>
       {/each}
     </div>

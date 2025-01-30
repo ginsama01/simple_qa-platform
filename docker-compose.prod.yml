@@ -1,0 +1,96 @@
+version: "3.4"
+
+volumes:
+  astro_node_modules:
+
+services:
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - qa-api
+      - qa-ui
+    ports:
+      - 7800:7800
+
+  qa-api:
+    build: 
+      context: qa-api
+      dockerfile: Dockerfile.prod
+    image: qa-api-prod
+    restart: "on-failure"
+    expose:
+      - 7777
+    depends_on:
+      - database
+      - flyway
+      - redis
+    env_file:
+      - project.prod.env
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: "5s"
+        max_attempts: 5
+        window: "30s"
+
+  qa-ui:
+    build: 
+      context: qa-ui
+      dockerfile: Dockerfile.prod
+    image: qa-ui-prod
+    restart: "on-failure"
+    expose:
+      - 3000:80
+    depends_on:
+      - qa-api
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: "5s"
+        max_attempts: 5
+        window: "30s"
+
+  llm-api:
+    build: 
+      context: llm-api
+      dockerfile: Dockerfile.prod
+    image: llm-api-prod
+    restart: "on-failure"
+    expose:
+      - 7000
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: '5s'
+        max_attempts: 5
+        window: '30s'
+
+  database:
+    container_name: database-server-dab-p2-5038fbd3-6e1c-44cd-8ef0-4a3f69ad7130
+    image: postgres:14.1
+    restart: unless-stopped
+    volumes:
+      - ./production-database-data:/var/lib/postgresql/data
+    env_file:
+      - project.prod.env
+
+  flyway:
+    image: flyway/flyway:9.11.0-alpine
+    depends_on:
+      - database
+    volumes:
+      - ./flyway/sql/:/flyway/sql
+    command: -connectRetries=60 -baselineOnMigrate=true migrate
+    env_file:
+      - project.prod.env
+
+  redis:
+    image: redis:latest
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    expose:
+      - 6379
+      

@@ -1,0 +1,9 @@
+---
+import Layout from "../../layout/Layout.astro";
+import QuestionPage from "../../components/QuestionPage.svelte";
+
+---
+
+<Layout>
+  <QuestionPage client:only={"svelte"} />
+</Layout>

@@ -6,7 +6,7 @@
   import { onMount } from "svelte";
   import AlertModal from "./AlertModal.svelte";
 
-  export let id;
+  let id = localStorage.getItem("questionId") || "";
 
   let question;
   let answers;
