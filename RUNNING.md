@@ -20,6 +20,8 @@ To restart the app
 docker compose up
 ```
 
+The application can be accessed at localhost:7800
+
 ### To run the e2e test
 
 ```bash
@@ -67,6 +69,8 @@ To restart the app
 ```bash
 docker compose -f docker-compose.prod.yml up -d 
 ```
+
+The application can be accessed at localhost:7800
 
 
 ## Deploy using Kubernetes
