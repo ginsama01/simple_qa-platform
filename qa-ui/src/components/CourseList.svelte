@@ -10,7 +10,7 @@
 
   const openCoursePage = async (id) => {
     localStorage.setItem("courseId", id);
-    window.location.href = '/courses';
+    window.location.href = "courses/";
   }
 
 </script>

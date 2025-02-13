@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qa-ui-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qa-ui-deployment
+  template:
+    metadata:
+      labels:
+        app: qa-ui-deployment
+    spec:
+      containers:
+        - name: qa-ui
+          image: qa-ui:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              cpu: 500m
+            requests:
+              cpu: 200m
+              
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qa-ui
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+  selector:
+    app: qa-ui-deployment

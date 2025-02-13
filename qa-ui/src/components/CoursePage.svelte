@@ -36,7 +36,9 @@
   }
 
   const createSocketConnection = () => {
-    ws = new WebSocket("ws://localhost:7800/api/ws");
+    const host = window.location.host;
+    console.log(host);
+    ws = new WebSocket("ws://" + host + "/api/ws");
 
     ws.onmessage = async (event) => {
       if (event.data == "Update question") {
@@ -115,7 +117,7 @@
 
   const openQuestionPage = async (id) => {
     localStorage.setItem("questionId", id);
-    window.location.href = '/questions';
+    window.location.href = '/questions/';
   }
 
 </script>
